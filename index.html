@@ -1302,14 +1302,8 @@
         const item = document.createElement('div')
         item.className = 'file-item'
         item.style.animationDelay = `${index * 0.05}s`
-        item.onclick = (e) => {
-          if (!e.target.closest('button') && !e.target.closest('a')) {
-            showFileDetails(file.name)
-          }
-        }
-        
         item.innerHTML = `
-          <div class="file-info">
+          <div class="file-info" onclick="handleDownload('${file.name}', this, event)" style="cursor: pointer;">
             <div class="file-icon ${fileType.type}">${fileType.icon}</div>
             <div class="file-details">
               <h3>
@@ -1329,9 +1323,10 @@
           </div>
           <div class="file-actions">
             <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接">📋</button>
+            <button class="action-btn" onclick="showFileDetails('${file.name}')" title="查看详情">ℹ️</button>
             <button class="download-btn" onclick="handleDownload('${file.name}', this, event)">
               下载
-            </a>
+            </button>
           </div>
         `
         
@@ -1364,15 +1359,10 @@
         const item = document.createElement('div')
         item.className = 'grid-item'
         item.style.animationDelay = `${index * 0.05}s`
-        item.onclick = (e) => {
-          if (!e.target.closest('button') && !e.target.closest('a')) {
-            showFileDetails(file.name)
-          }
-        }
         
         item.innerHTML = `
-          <div class="file-icon ${fileType.type}">${fileType.icon}</div>
-          <h3 title="${file.name}">${file.name}</h3>
+          <div class="file-icon ${fileType.type}" onclick="handleDownload('${file.name}', this, event)" style="cursor: pointer;">${fileType.icon}</div>
+          <h3 title="${file.name}" onclick="handleDownload('${file.name}', this, event)" style="cursor: pointer;">${file.name}</h3>
           <div class="file-meta">
             <span class="file-type-badge">${fileType.name}</span>
             <span>${formatSize(file.size)}</span>
@@ -1383,9 +1373,10 @@
           </div>
           <div style="display: flex; gap: 8px;">
             <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接" style="flex: 0 0 40px;">📋</button>
+            <button class="action-btn" onclick="showFileDetails('${file.name}')" title="查看详情" style="flex: 0 0 40px;">ℹ️</button>
             <button class="download-btn" onclick="handleDownload('${file.name}', this, event)" style="flex: 1;">
               下载
-            </a>
+            </button>
           </div>
         `
         
