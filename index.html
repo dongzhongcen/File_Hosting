@@ -994,12 +994,17 @@
     
     // 格式化大小
     function formatSize(bytes) {
-      if (bytes === null) return '获取中...'
+      if (bytes === null) return '未知'
       if (bytes === 0) return '0 B'
       const units = ['B', 'KB', 'MB', 'GB', 'TB']
       const k = 1024
       const i = Math.floor(Math.log(bytes) / Math.log(k))
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + units[i]
+    }
+    
+    // 检测是否在本地文件系统打开
+    function isLocalFile() {
+      return window.location.protocol === 'file:'
     }
     
     // Toast 提示
@@ -1026,7 +1031,11 @@
     
     // 复制链接
     function copyLink(filename) {
-      const url = `${window.location.origin}/files/${filename}`
+      // 如果是在本地文件系统，使用相对路径
+      const baseUrl = isLocalFile() 
+        ? window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1)
+        : window.location.origin + '/'
+      const url = `${baseUrl}files/${filename}`
       navigator.clipboard.writeText(url).then(() => {
         showToast('链接已复制到剪贴板！')
       }).catch(() => {
@@ -1140,20 +1149,41 @@
       // 阻止默认下载行为
       if (event) event.preventDefault()
       
+      // 如果是在本地文件系统打开，使用传统下载方式
+      if (isLocalFile()) {
+        showToast('❌ 请通过服务器访问以支持下载统计', 'error')
+        // 仍然允许下载，但不计数
+        const a = document.createElement('a')
+        a.href = `files/${filename}`
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        return
+      }
+      
       const originalText = btnElement.innerHTML
       btnElement.innerHTML = '<span class="loading"></span>'
       btnElement.style.pointerEvents = 'none'
       
       try {
         // 使用 fetch 下载文件
-        const response = await fetch(`/files/${filename}`)
+        const response = await fetch(`files/${filename}`)
         
         if (!response.ok) {
-          throw new Error(`下载失败: ${response.status}`)
+          if (response.status === 404) {
+            throw new Error(`文件未找到: ${filename}`)
+          }
+          throw new Error(`服务器错误: ${response.status}`)
         }
         
         // 获取文件 blob
         const blob = await response.blob()
+        
+        // 检查 blob 大小是否为 0
+        if (blob.size === 0) {
+          throw new Error('文件内容为空')
+        }
         
         // 创建下载链接
         const url = window.URL.createObjectURL(blob)
@@ -1189,7 +1219,7 @@
         
       } catch (error) {
         console.error('下载错误:', error)
-        showToast(`❌ 下载失败: ${filename}`, 'error')
+        showToast(`❌ ${error.message}`, 'error')
       } finally {
         // 恢复按钮状态
         btnElement.innerHTML = originalText
@@ -1227,14 +1257,22 @@
     
     // 获取文件大小
     async function fetchFileSize(filename) {
+      // 如果在本地文件系统打开，直接返回 null
+      if (isLocalFile()) {
+        return null
+      }
+      
       try {
-        const response = await fetch(`/files/${filename}`, { method: 'HEAD' })
+        const response = await fetch(`files/${filename}`, { method: 'HEAD' })
         if (response.ok) {
           const size = response.headers.get('content-length')
           return size ? parseInt(size) : null
+        } else if (response.status === 404) {
+          console.warn(`文件未找到: ${filename}`)
+          return null
         }
       } catch (e) {
-        console.log('无法获取文件大小:', filename)
+        console.log('无法获取文件大小:', filename, e.message)
       }
       return null
     }
