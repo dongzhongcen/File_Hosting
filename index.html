@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📁 文件下载中心</title>
+  <title>📁 File Hosting - dongzhongcen</title>
   <style>
     * {
       margin: 0;
@@ -11,104 +11,351 @@
       box-sizing: border-box;
     }
     
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #ec4899;
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.8);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border: rgba(148, 163, 184, 0.1);
+    }
+    
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--bg-dark);
       min-height: 100vh;
-      padding: 40px 20px;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+    
+    /* 动态背景 */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+    }
+    
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      animation: bgMove 60s linear infinite;
+    }
+    
+    @keyframes bgMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
     }
     
     .container {
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 30px 20px;
     }
     
-    /* 头部样式 */
+    /* 头部区域 */
     .header {
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .header-title h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .header-title p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    
+    /* 作者面板 */
+    .author-panel {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .author-panel:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+    }
+    
+    .author-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
       color: white;
     }
     
-    .header h1 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    .author-info {
+      display: flex;
+      flex-direction: column;
     }
     
-    .header p {
-      font-size: 16px;
-      opacity: 0.9;
+    .author-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+    
+    .author-role {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .author-link {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+      color: var(--primary);
+      font-size: 12px;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    
+    .author-link:hover {
+      opacity: 1;
     }
     
     /* 统计卡片 */
     .stats-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
       margin-bottom: 25px;
     }
     
+    @media (max-width: 768px) {
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
     .stat-card {
-      background: rgba(255,255,255,0.95);
+      background: var(--bg-card);
       border-radius: 16px;
       padding: 20px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
       backdrop-filter: blur(10px);
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    
+    .stat-card:hover::before {
+      transform: scaleX(1);
     }
     
     .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      transform: translateY(-3px);
+      border-color: rgba(99, 102, 241, 0.3);
     }
     
     .stat-icon {
-      font-size: 28px;
-      margin-bottom: 8px;
+      font-size: 24px;
+      margin-bottom: 10px;
     }
     
     .stat-value {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
-      color: #667eea;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .stat-label {
       font-size: 13px;
-      color: #666;
+      color: var(--text-secondary);
       margin-top: 4px;
     }
     
-    /* 文件列表 */
-    .file-list {
-      background: rgba(255,255,255,0.95);
+    /* 控制栏 */
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+    }
+    
+    .search-box input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .search-box input::placeholder {
+      color: var(--text-secondary);
+    }
+    
+    .search-box .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+    
+    .control-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 10px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn:hover {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-color: transparent;
+    }
+    
+    .view-toggle {
+      display: flex;
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    
+    .view-btn {
+      padding: 8px 14px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 16px;
+    }
+    
+    .view-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    /* 文件列表容器 */
+    .file-container {
+      background: var(--bg-card);
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
       backdrop-filter: blur(10px);
       overflow: hidden;
     }
     
     .file-list-header {
       display: grid;
-      grid-template-columns: 1fr 100px 120px 100px;
+      grid-template-columns: 1fr 120px 100px 100px;
       padding: 16px 24px;
-      background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+      background: rgba(15, 23, 42, 0.5);
       font-weight: 600;
-      font-size: 14px;
-      color: #495057;
-      border-bottom: 1px solid #dee2e6;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .file-item {
       display: grid;
-      grid-template-columns: 1fr 100px 120px 100px;
-      padding: 18px 24px;
+      grid-template-columns: 1fr 120px 100px 100px;
+      padding: 16px 24px;
       align-items: center;
-      border-bottom: 1px solid #f1f3f5;
-      transition: background 0.2s;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+      cursor: pointer;
     }
     
     .file-item:last-child {
@@ -116,51 +363,76 @@
     }
     
     .file-item:hover {
-      background: #f8f9fa;
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .file-item.selected {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 3px solid var(--primary);
     }
     
     /* 文件信息 */
     .file-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
     
     .file-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
       flex-shrink: 0;
+      transition: transform 0.3s;
     }
     
-    .file-icon.image { background: #e3f2fd; }
-    .file-icon.video { background: #fce4ec; }
-    .file-icon.audio { background: #f3e5f5; }
-    .file-icon.document { background: #e8f5e9; }
-    .file-icon.archive { background: #fff3e0; }
-    .file-icon.code { background: #e0f2f1; }
-    .file-icon.default { background: #f5f5f5; }
+    .file-item:hover .file-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+    
+    .file-icon.image { background: rgba(59, 130, 246, 0.2); }
+    .file-icon.video { background: rgba(236, 72, 153, 0.2); }
+    .file-icon.audio { background: rgba(168, 85, 247, 0.2); }
+    .file-icon.document { background: rgba(34, 197, 94, 0.2); }
+    .file-icon.archive { background: rgba(245, 158, 11, 0.2); }
+    .file-icon.code { background: rgba(99, 102, 241, 0.2); }
+    .file-icon.default { background: rgba(148, 163, 184, 0.2); }
     
     .file-details h3 {
       font-size: 15px;
       font-weight: 600;
-      color: #212529;
-      margin-bottom: 3px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
-    .file-type {
+    .file-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       font-size: 12px;
-      color: #868e96;
+      color: var(--text-secondary);
+    }
+    
+    .file-type-badge {
+      padding: 2px 8px;
+      background: rgba(99, 102, 241, 0.15);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 500;
     }
     
     /* 文件大小 */
     .file-size {
       font-size: 14px;
-      color: #495057;
+      color: var(--text-secondary);
       font-weight: 500;
     }
     
@@ -170,30 +442,63 @@
       align-items: center;
       gap: 6px;
       font-size: 14px;
-      color: #495057;
+      color: var(--text-secondary);
       font-weight: 500;
     }
     
     .download-count .count-icon {
-      color: #adb5bd;
+      opacity: 0.5;
     }
     
     .download-count.hot {
-      color: #e64980;
+      color: #fbbf24;
     }
     
     .download-count.hot .count-icon {
-      color: #ff6b6b;
+      opacity: 1;
+      animation: pulse 1.5s infinite;
     }
     
-    /* 下载按钮 */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    /* 操作按钮 */
+    .file-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    .action-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+    
     .download-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 10px 18px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       color: white;
       border: none;
       border-radius: 10px;
@@ -202,24 +507,80 @@
       cursor: pointer;
       text-decoration: none;
       transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
     
     .download-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
     }
     
     .download-btn:active {
       transform: translateY(0);
     }
     
-    .download-btn .arrow {
-      transition: transform 0.2s;
+    /* 网格视图 */
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 24px;
     }
     
-    .download-btn:hover .arrow {
-      transform: translateY(2px);
+    .grid-item {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .grid-item:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+    }
+    
+    .grid-item .file-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .grid-item h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .grid-item .file-meta {
+      margin-bottom: 16px;
+    }
+    
+    .grid-item .download-btn {
+      width: 100%;
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+    
+    .empty-state h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
     
     /* 动画 */
@@ -234,12 +595,136 @@
       }
     }
     
-    .file-item {
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .file-item, .grid-item {
       animation: fadeIn 0.5s ease forwards;
     }
     
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    
+    .toast {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+      max-width: 350px;
+    }
+    
+    .toast.success {
+      border-left: 4px solid #22c55e;
+    }
+    
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+    
+    .toast.info {
+      border-left: 4px solid var(--primary);
+    }
+    
+    /* 预览模态框 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+    
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+    
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s;
+    }
+    
+    .modal-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
     /* 响应式 */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
       .file-list-header {
         display: none;
       }
@@ -250,69 +735,108 @@
         padding: 20px;
       }
       
-      .file-info {
-        width: 100%;
+      .file-actions {
+        justify-content: flex-start;
       }
       
-      .file-size, .download-count {
-        display: inline-flex;
-        margin-right: 20px;
+      .control-bar {
+        flex-direction: column;
+        align-items: stretch;
       }
       
-      .download-btn {
-        width: 100%;
-        margin-top: 8px;
+      .search-box {
+        max-width: none;
       }
     }
     
-    /* 空状态 */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #868e96;
+    /* 加载动画 */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
     }
     
-    .empty-state .icon {
-      font-size: 64px;
-      margin-bottom: 16px;
-      opacity: 0.5;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     
-    .empty-state p {
-      font-size: 16px;
+    /* 排序下拉菜单 */
+    .dropdown {
+      position: relative;
     }
     
-    /* Toast 提示 */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #212529;
-      color: white;
-      padding: 14px 24px;
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--bg-card);
       border-radius: 12px;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      min-width: 160px;
       opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
       transition: all 0.3s;
-      z-index: 1000;
+      z-index: 100;
     }
     
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
+    .dropdown.active .dropdown-menu {
       opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dropdown-item {
+      padding: 12px 16px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .dropdown-item:hover {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--text-primary);
+    }
+    
+    .dropdown-item:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+    
+    .dropdown-item:last-child {
+      border-radius: 0 0 12px 12px;
     }
   </style>
 </head>
 
 <body>
+  <div class="bg-animation"></div>
+  
   <div class="container">
-    <!-- 头部 -->
+    <!-- 头部区域 -->
     <div class="header">
-      <h1>📁 文件下载中心</h1>
-      <p>快速、安全地下载您需要的文件</p>
+      <div class="header-title">
+        <h1>📁 File Hosting</h1>
+        <p>快速、安全地分享和管理您的文件</p>
+      </div>
+      
+      <!-- 作者面板 -->
+      <a href="https://github.com/dongzhongcen" target="_blank" class="author-panel">
+        <div class="author-avatar">D</div>
+        <div class="author-info">
+          <span class="author-name">dongzhongcen</span>
+          <span class="author-role">File Hosting Owner</span>
+        </div>
+        <span class="author-link">GitHub →</span>
+      </a>
     </div>
     
     <!-- 统计卡片 -->
@@ -332,10 +856,43 @@
         <div class="stat-value" id="hotFile">-</div>
         <div class="stat-label">热门文件</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value" id="todayDownloads">0</div>
+        <div class="stat-label">今日下载</div>
+      </div>
     </div>
     
-    <!-- 文件列表 -->
-    <div class="file-list">
+    <!-- 控制栏 -->
+    <div class="control-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索文件名...">
+      </div>
+      
+      <div class="control-actions">
+        <div class="dropdown" id="sortDropdown">
+          <button class="btn" onclick="toggleSortDropdown()">
+            <span>⇅</span>
+            <span id="sortLabel">排序</span>
+          </button>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" onclick="sortFiles('name')">📋 按名称</div>
+            <div class="dropdown-item" onclick="sortFiles('size')">📏 按大小</div>
+            <div class="dropdown-item" onclick="sortFiles('downloads')">⬇️ 按下载量</div>
+            <div class="dropdown-item" onclick="sortFiles('date')">📅 按日期</div>
+          </div>
+        </div>
+        
+        <div class="view-toggle">
+          <button class="view-btn active" onclick="switchView('list')" title="列表视图">☰</button>
+          <button class="view-btn" onclick="switchView('grid')" title="网格视图">⊞</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 文件列表容器 -->
+    <div class="file-container">
       <div class="file-list-header">
         <span>文件名</span>
         <span>大小</span>
@@ -346,43 +903,85 @@
     </div>
   </div>
   
-  <!-- Toast 提示 -->
-  <div class="toast" id="toast"></div>
+  <!-- Toast 容器 -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- 文件详情模态框 -->
+  <div class="modal" id="fileModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">文件详情</h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
 
   <script>
     // ========== 配置区域 ==========
     const files = [
-      { name: "Test_Photo.png", size: null },
+      { name: "Test_Photo.png", size: null, date: new Date().toISOString() },
       // 添加更多文件，例如:
-      // { name: "document.pdf", size: null },
-      // { name: "video.mp4", size: null },
+      // { name: "document.pdf", size: null, date: "2024-01-15T10:00:00Z" },
+      // { name: "video.mp4", size: null, date: "2024-01-14T08:30:00Z" },
     ]
     // ==============================
 
-    // 获取或初始化下载次数
+    let currentView = 'list'
+    let currentSort = 'name'
+    let filteredFiles = [...files]
+    
+    // 获取下载数据
+    function getDownloadData() {
+      return JSON.parse(localStorage.getItem('fileDownloadData') || '{}')
+    }
+    
+    function saveDownloadData(data) {
+      localStorage.setItem('fileDownloadData', JSON.stringify(data))
+    }
+    
     function getDownloadCount(filename) {
-      const counts = JSON.parse(localStorage.getItem('downloadCounts') || '{}')
-      return counts[filename] || 0
+      const data = getDownloadData()
+      return data[filename]?.count || 0
     }
     
-    // 增加下载次数
     function incrementDownloadCount(filename) {
-      const counts = JSON.parse(localStorage.getItem('downloadCounts') || '{}')
-      counts[filename] = (counts[filename] || 0) + 1
-      localStorage.setItem('downloadCounts', JSON.stringify(counts))
-      return counts[filename]
+      const data = getDownloadData()
+      const today = new Date().toDateString()
+      
+      if (!data[filename]) {
+        data[filename] = { count: 0, history: {} }
+      }
+      
+      data[filename].count++
+      data[filename].history[today] = (data[filename].history[today] || 0) + 1
+      
+      saveDownloadData(data)
+      return data[filename].count
     }
     
-    // 获取文件类型和图标
+    function getTodayDownloads() {
+      const data = getDownloadData()
+      const today = new Date().toDateString()
+      let total = 0
+      
+      Object.values(data).forEach(file => {
+        total += file.history[today] || 0
+      })
+      
+      return total
+    }
+    
+    // 获取文件类型
     function getFileType(filename) {
       const ext = filename.split('.').pop().toLowerCase()
       const types = {
-        image: { ext: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'], icon: '🖼️', name: '图片' },
-        video: { ext: ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'], icon: '🎬', name: '视频' },
-        audio: { ext: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'], icon: '🎵', name: '音频' },
-        document: { ext: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'], icon: '📄', name: '文档' },
-        archive: { ext: ['zip', 'rar', '7z', 'tar', 'gz'], icon: '📦', name: '压缩包' },
-        code: { ext: ['js', 'html', 'css', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'json', 'xml'], icon: '💻', name: '代码' }
+        image: { ext: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'], icon: '🖼️', name: '图片', color: '#3b82f6' },
+        video: { ext: ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'], icon: '🎬', name: '视频', color: '#ec4899' },
+        audio: { ext: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'], icon: '🎵', name: '音频', color: '#a855f7' },
+        document: { ext: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'], icon: '📄', name: '文档', color: '#22c55e' },
+        archive: { ext: ['zip', 'rar', '7z', 'tar', 'gz'], icon: '📦', name: '压缩包', color: '#f59e0b' },
+        code: { ext: ['js', 'html', 'css', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'json', 'xml'], icon: '💻', name: '代码', color: '#6366f1' }
       }
       
       for (const [type, info] of Object.entries(types)) {
@@ -390,10 +989,10 @@
           return { type, ...info }
         }
       }
-      return { type: 'default', icon: '📎', name: '文件' }
+      return { type: 'default', icon: '📎', name: '文件', color: '#94a3b8' }
     }
     
-    // 格式化文件大小
+    // 格式化大小
     function formatSize(bytes) {
       if (bytes === null) return '获取中...'
       if (bytes === 0) return '0 B'
@@ -403,15 +1002,160 @@
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + units[i]
     }
     
-    // 显示 Toast
-    function showToast(message) {
-      const toast = document.getElementById('toast')
-      toast.textContent = message
-      toast.classList.add('show')
-      setTimeout(() => toast.classList.remove('show'), 2500)
+    // Toast 提示
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer')
+      const toast = document.createElement('div')
+      toast.className = `toast ${type}`
+      
+      const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️'
+      }
+      
+      toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`
+      container.appendChild(toast)
+      
+      setTimeout(() => {
+        toast.style.opacity = '0'
+        toast.style.transform = 'translateX(100%)'
+        setTimeout(() => toast.remove(), 300)
+      }, 3000)
     }
     
-    // 更新统计数据
+    // 复制链接
+    function copyLink(filename) {
+      const url = `${window.location.origin}/files/${filename}`
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('链接已复制到剪贴板！')
+      }).catch(() => {
+        showToast('复制失败', 'error')
+      })
+    }
+    
+    // 显示文件详情
+    function showFileDetails(filename) {
+      const file = files.find(f => f.name === filename)
+      const fileType = getFileType(filename)
+      const downloadCount = getDownloadCount(filename)
+      
+      const modal = document.getElementById('fileModal')
+      const body = document.getElementById('modalBody')
+      
+      body.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+          <div class="file-icon ${fileType.type}" style="width: 80px; height: 80px; font-size: 40px;">
+            ${fileType.icon}
+          </div>
+          <div>
+            <h2 style="font-size: 20px; margin-bottom: 8px;">${filename}</h2>
+            <div style="color: var(--text-secondary); font-size: 14px;">
+              类型: ${fileType.name} | 大小: ${formatSize(file.size)}
+            </div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+          <div style="background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: 12px;">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">下载次数</div>
+            <div style="font-size: 24px; font-weight: 700; color: ${fileType.color};">${downloadCount}</div>
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: 12px;">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">上传日期</div>
+            <div style="font-size: 16px; font-weight: 600;">${new Date(file.date).toLocaleDateString('zh-CN')}</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="download-btn" onclick="handleDownload('${filename}', this); closeModal();" style="flex: 1;">
+            ⬇️ 立即下载
+          </button>
+          <button class="btn" onclick="copyLink('${filename}')" style="padding: 10px 20px;">
+            📋 复制链接
+          </button>
+        </div>
+      `
+      
+      modal.classList.add('active')
+    }
+    
+    function closeModal() {
+      document.getElementById('fileModal').classList.remove('active')
+    }
+    
+    // 切换视图
+    function switchView(view) {
+      currentView = view
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.toggle('active', 
+          (view === 'list' && btn.textContent === '☰') ||
+          (view === 'grid' && btn.textContent === '⊞')
+        )
+      })
+      renderFileList()
+    }
+    
+    // 排序下拉菜单
+    function toggleSortDropdown() {
+      document.getElementById('sortDropdown').classList.toggle('active')
+    }
+    
+    function sortFiles(sortBy) {
+      currentSort = sortBy
+      const labels = {
+        name: '按名称',
+        size: '按大小',
+        downloads: '按下载量',
+        date: '按日期'
+      }
+      document.getElementById('sortLabel').textContent = labels[sortBy]
+      document.getElementById('sortDropdown').classList.remove('active')
+      
+      filteredFiles.sort((a, b) => {
+        switch(sortBy) {
+          case 'name':
+            return a.name.localeCompare(b.name)
+          case 'size':
+            return (b.size || 0) - (a.size || 0)
+          case 'downloads':
+            return getDownloadCount(b.name) - getDownloadCount(a.name)
+          case 'date':
+            return new Date(b.date) - new Date(a.date)
+          default:
+            return 0
+        }
+      })
+      
+      renderFileList()
+    }
+    
+    // 搜索
+    document.getElementById('searchInput')?.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase()
+      filteredFiles = files.filter(f => f.name.toLowerCase().includes(query))
+      renderFileList()
+    })
+    
+    // 处理下载
+    function handleDownload(filename, btnElement) {
+      const newCount = incrementDownloadCount(filename)
+      
+      if (btnElement.closest('.file-item')) {
+        const countEl = btnElement.closest('.file-item').querySelector('.count-value')
+        const countContainer = btnElement.closest('.file-item').querySelector('.download-count')
+        countEl.textContent = newCount
+        if (newCount >= 5) countContainer.classList.add('hot')
+      }
+      
+      updateStats()
+      showToast(`已开始下载: ${filename}`)
+      
+      if (btnElement) {
+        btnElement.style.transform = 'scale(0.95)'
+        setTimeout(() => btnElement.style.transform = '', 150)
+      }
+    }
+    
+    // 更新统计
     function updateStats() {
       const totalFiles = files.length
       let totalDownloads = 0
@@ -429,35 +1173,10 @@
       
       document.getElementById('totalFiles').textContent = totalFiles
       document.getElementById('totalDownloads').textContent = totalDownloads
-      document.getElementById('hotFile').textContent = hotFileName.length > 10 
-        ? hotFileName.substring(0, 10) + '...' 
+      document.getElementById('todayDownloads').textContent = getTodayDownloads()
+      document.getElementById('hotFile').textContent = hotFileName.length > 8 
+        ? hotFileName.substring(0, 8) + '...' 
         : hotFileName
-    }
-    
-    // 处理下载
-    function handleDownload(filename, btnElement) {
-      // 增加下载次数
-      const newCount = incrementDownloadCount(filename)
-      
-      // 更新显示
-      const countEl = btnElement.closest('.file-item').querySelector('.download-count .count-value')
-      const countContainer = btnElement.closest('.file-item').querySelector('.download-count')
-      countEl.textContent = newCount
-      
-      // 热门样式（超过5次）
-      if (newCount >= 5) {
-        countContainer.classList.add('hot')
-      }
-      
-      // 更新统计
-      updateStats()
-      
-      // 显示提示
-      showToast(`✅ 已开始下载: ${filename}`)
-      
-      // 按钮动画
-      btnElement.style.transform = 'scale(0.95)'
-      setTimeout(() => btnElement.style.transform = '', 150)
     }
     
     // 获取文件大小
@@ -474,65 +1193,147 @@
       return null
     }
     
-    // 渲染文件列表
-    async function renderFileList() {
+    // 渲染列表视图
+    function renderListView() {
       const list = document.getElementById('fileList')
+      list.className = ''
       
-      if (files.length === 0) {
+      if (filteredFiles.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
             <div class="icon">📭</div>
-            <p>暂无文件</p>
+            <h3>没有找到文件</h3>
+            <p>试试其他搜索词</p>
           </div>
         `
         return
       }
       
-      // 获取所有文件大小
-      for (const file of files) {
-        file.size = await fetchFileSize(file.name)
-      }
-      
-      // 渲染文件项
-      files.forEach((file, index) => {
+      filteredFiles.forEach((file, index) => {
         const fileType = getFileType(file.name)
         const downloadCount = getDownloadCount(file.name)
         const isHot = downloadCount >= 5
         
         const item = document.createElement('div')
         item.className = 'file-item'
-        item.style.animationDelay = `${index * 0.1}s`
+        item.style.animationDelay = `${index * 0.05}s`
+        item.onclick = (e) => {
+          if (!e.target.closest('button') && !e.target.closest('a')) {
+            showFileDetails(file.name)
+          }
+        }
         
         item.innerHTML = `
           <div class="file-info">
             <div class="file-icon ${fileType.type}">${fileType.icon}</div>
             <div class="file-details">
-              <h3>${file.name}</h3>
-              <span class="file-type">${fileType.name}</span>
+              <h3>
+                ${file.name}
+                ${isHot ? '<span style="color: #fbbf24;">🔥</span>' : ''}
+              </h3>
+              <div class="file-meta">
+                <span class="file-type-badge">${fileType.name}</span>
+                <span>${new Date(file.date).toLocaleDateString('zh-CN')}</span>
+              </div>
             </div>
           </div>
           <div class="file-size">${formatSize(file.size)}</div>
           <div class="download-count ${isHot ? 'hot' : ''}">
-            <span class="count-icon">${isHot ? '🔥' : '⬇️'}</span>
+            <span class="count-icon">⬇️</span>
             <span class="count-value">${downloadCount}</span>
           </div>
-          <a class="download-btn" href="/files/${file.name}" download="${file.name}">
-            <span>下载</span>
-            <span class="arrow">⬇</span>
-          </a>
+          <div class="file-actions">
+            <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接">📋</button>
+            <a class="download-btn" href="/files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', this)">
+              下载
+            </a>
+          </div>
         `
-        
-        // 绑定下载事件
-        const btn = item.querySelector('.download-btn')
-        btn.addEventListener('click', (e) => {
-          handleDownload(file.name, btn)
-        })
         
         list.appendChild(item)
       })
+    }
+    
+    // 渲染网格视图
+    function renderGridView() {
+      const list = document.getElementById('fileList')
+      list.className = 'file-grid'
+      
+      if (filteredFiles.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="icon">📭</div>
+            <h3>没有找到文件</h3>
+            <p>试试其他搜索词</p>
+          </div>
+        `
+        return
+      }
+      
+      filteredFiles.forEach((file, index) => {
+        const fileType = getFileType(file.name)
+        const downloadCount = getDownloadCount(file.name)
+        const isHot = downloadCount >= 5
+        
+        const item = document.createElement('div')
+        item.className = 'grid-item'
+        item.style.animationDelay = `${index * 0.05}s`
+        item.onclick = (e) => {
+          if (!e.target.closest('button') && !e.target.closest('a')) {
+            showFileDetails(file.name)
+          }
+        }
+        
+        item.innerHTML = `
+          <div class="file-icon ${fileType.type}">${fileType.icon}</div>
+          <h3 title="${file.name}">${file.name}</h3>
+          <div class="file-meta">
+            <span class="file-type-badge">${fileType.name}</span>
+            <span>${formatSize(file.size)}</span>
+          </div>
+          <div class="download-count ${isHot ? 'hot' : ''}" style="margin-bottom: 12px;">
+            <span class="count-icon">${isHot ? '🔥' : '⬇️'}</span>
+            <span class="count-value">${downloadCount} 次下载</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接" style="flex: 0 0 40px;">📋</button>
+            <a class="download-btn" href="/files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', this)" style="flex: 1;">
+              下载
+            </a>
+          </div>
+        `
+        
+        list.appendChild(item)
+      })
+    }
+    
+    // 渲染文件列表
+    async function renderFileList() {
+      // 获取文件大小
+      for (const file of files) {
+        if (file.size === null) {
+          file.size = await fetchFileSize(file.name)
+        }
+      }
+      
+      if (currentView === 'list') {
+        renderListView()
+      } else {
+        renderGridView()
+      }
       
       updateStats()
     }
+    
+    // 点击外部关闭下拉菜单和模态框
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown')) {
+        document.getElementById('sortDropdown')?.classList.remove('active')
+      }
+      if (e.target.classList.contains('modal')) {
+        closeModal()
+      }
+    })
     
     // 初始化
     renderFileList()
