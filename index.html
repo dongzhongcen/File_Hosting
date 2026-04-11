@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📁 文件下载中心</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    /* 头部样式 */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    /* 统计卡片 */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .stat-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    /* 文件列表 */
+    .file-list {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+    
+    .file-list-header {
+      display: grid;
+      grid-template-columns: 1fr 100px 120px 100px;
+      padding: 16px 24px;
+      background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+      font-weight: 600;
+      font-size: 14px;
+      color: #495057;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .file-item {
+      display: grid;
+      grid-template-columns: 1fr 100px 120px 100px;
+      padding: 18px 24px;
+      align-items: center;
+      border-bottom: 1px solid #f1f3f5;
+      transition: background 0.2s;
+    }
+    
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    
+    .file-item:hover {
+      background: #f8f9fa;
+    }
+    
+    /* 文件信息 */
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .file-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    
+    .file-icon.image { background: #e3f2fd; }
+    .file-icon.video { background: #fce4ec; }
+    .file-icon.audio { background: #f3e5f5; }
+    .file-icon.document { background: #e8f5e9; }
+    .file-icon.archive { background: #fff3e0; }
+    .file-icon.code { background: #e0f2f1; }
+    .file-icon.default { background: #f5f5f5; }
+    
+    .file-details h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 3px;
+    }
+    
+    .file-type {
+      font-size: 12px;
+      color: #868e96;
+    }
+    
+    /* 文件大小 */
+    .file-size {
+      font-size: 14px;
+      color: #495057;
+      font-weight: 500;
+    }
+    
+    /* 下载次数 */
+    .download-count {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #495057;
+      font-weight: 500;
+    }
+    
+    .download-count .count-icon {
+      color: #adb5bd;
+    }
+    
+    .download-count.hot {
+      color: #e64980;
+    }
+    
+    .download-count.hot .count-icon {
+      color: #ff6b6b;
+    }
+    
+    /* 下载按钮 */
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    .download-btn:active {
+      transform: translateY(0);
+    }
+    
+    .download-btn .arrow {
+      transition: transform 0.2s;
+    }
+    
+    .download-btn:hover .arrow {
+      transform: translateY(2px);
+    }
+    
+    /* 动画 */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .file-item {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 640px) {
+      .file-list-header {
+        display: none;
+      }
+      
+      .file-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 20px;
+      }
+      
+      .file-info {
+        width: 100%;
+      }
+      
+      .file-size, .download-count {
+        display: inline-flex;
+        margin-right: 20px;
+      }
+      
+      .download-btn {
+        width: 100%;
+        margin-top: 8px;
+      }
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #868e96;
+    }
+    
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    .empty-state p {
+      font-size: 16px;
+    }
+    
+    /* Toast 提示 */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #212529;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 头部 -->
+    <div class="header">
+      <h1>📁 文件下载中心</h1>
+      <p>快速、安全地下载您需要的文件</p>
+    </div>
+    
+    <!-- 统计卡片 -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value" id="totalFiles">0</div>
+        <div class="stat-label">文件总数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⬇️</div>
+        <div class="stat-value" id="totalDownloads">0</div>
+        <div class="stat-label">总下载次数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="hotFile">-</div>
+        <div class="stat-label">热门文件</div>
+      </div>
+    </div>
+    
+    <!-- 文件列表 -->
+    <div class="file-list">
+      <div class="file-list-header">
+        <span>文件名</span>
+        <span>大小</span>
+        <span>下载次数</span>
+        <span>操作</span>
+      </div>
+      <div id="fileList"></div>
+    </div>
+  </div>
+  
+  <!-- Toast 提示 -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ========== 配置区域 ==========
+    const files = [
+      { name: "Test_Photo.png", size: null },
+      // 添加更多文件，例如:
+      // { name: "document.pdf", size: null },
+      // { name: "video.mp4", size: null },
+    ]
+    // ==============================
+
+    // 获取或初始化下载次数
+    function getDownloadCount(filename) {
+      const counts = JSON.parse(localStorage.getItem('downloadCounts') || '{}')
+      return counts[filename] || 0
+    }
+    
+    // 增加下载次数
+    function incrementDownloadCount(filename) {
+      const counts = JSON.parse(localStorage.getItem('downloadCounts') || '{}')
+      counts[filename] = (counts[filename] || 0) + 1
+      localStorage.setItem('downloadCounts', JSON.stringify(counts))
+      return counts[filename]
+    }
+    
+    // 获取文件类型和图标
+    function getFileType(filename) {
+      const ext = filename.split('.').pop().toLowerCase()
+      const types = {
+        image: { ext: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'], icon: '🖼️', name: '图片' },
+        video: { ext: ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'], icon: '🎬', name: '视频' },
+        audio: { ext: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'], icon: '🎵', name: '音频' },
+        document: { ext: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'], icon: '📄', name: '文档' },
+        archive: { ext: ['zip', 'rar', '7z', 'tar', 'gz'], icon: '📦', name: '压缩包' },
+        code: { ext: ['js', 'html', 'css', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'json', 'xml'], icon: '💻', name: '代码' }
+      }
+      
+      for (const [type, info] of Object.entries(types)) {
+        if (info.ext.includes(ext)) {
+          return { type, ...info }
+        }
+      }
+      return { type: 'default', icon: '📎', name: '文件' }
+    }
+    
+    // 格式化文件大小
+    function formatSize(bytes) {
+      if (bytes === null) return '获取中...'
+      if (bytes === 0) return '0 B'
+      const units = ['B', 'KB', 'MB', 'GB', 'TB']
+      const k = 1024
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + units[i]
+    }
+    
+    // 显示 Toast
+    function showToast(message) {
+      const toast = document.getElementById('toast')
+      toast.textContent = message
+      toast.classList.add('show')
+      setTimeout(() => toast.classList.remove('show'), 2500)
+    }
+    
+    // 更新统计数据
+    function updateStats() {
+      const totalFiles = files.length
+      let totalDownloads = 0
+      let maxDownloads = 0
+      let hotFileName = '-'
+      
+      files.forEach(file => {
+        const count = getDownloadCount(file.name)
+        totalDownloads += count
+        if (count > maxDownloads) {
+          maxDownloads = count
+          hotFileName = file.name
+        }
+      })
+      
+      document.getElementById('totalFiles').textContent = totalFiles
+      document.getElementById('totalDownloads').textContent = totalDownloads
+      document.getElementById('hotFile').textContent = hotFileName.length > 10 
+        ? hotFileName.substring(0, 10) + '...' 
+        : hotFileName
+    }
+    
+    // 处理下载
+    function handleDownload(filename, btnElement) {
+      // 增加下载次数
+      const newCount = incrementDownloadCount(filename)
+      
+      // 更新显示
+      const countEl = btnElement.closest('.file-item').querySelector('.download-count .count-value')
+      const countContainer = btnElement.closest('.file-item').querySelector('.download-count')
+      countEl.textContent = newCount
+      
+      // 热门样式（超过5次）
+      if (newCount >= 5) {
+        countContainer.classList.add('hot')
+      }
+      
+      // 更新统计
+      updateStats()
+      
+      // 显示提示
+      showToast(`✅ 已开始下载: ${filename}`)
+      
+      // 按钮动画
+      btnElement.style.transform = 'scale(0.95)'
+      setTimeout(() => btnElement.style.transform = '', 150)
+    }
+    
+    // 获取文件大小
+    async function fetchFileSize(filename) {
+      try {
+        const response = await fetch(`/files/${filename}`, { method: 'HEAD' })
+        if (response.ok) {
+          const size = response.headers.get('content-length')
+          return size ? parseInt(size) : null
+        }
+      } catch (e) {
+        console.log('无法获取文件大小:', filename)
+      }
+      return null
+    }
+    
+    // 渲染文件列表
+    async function renderFileList() {
+      const list = document.getElementById('fileList')
+      
+      if (files.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>暂无文件</p>
+          </div>
+        `
+        return
+      }
+      
+      // 获取所有文件大小
+      for (const file of files) {
+        file.size = await fetchFileSize(file.name)
+      }
+      
+      // 渲染文件项
+      files.forEach((file, index) => {
+        const fileType = getFileType(file.name)
+        const downloadCount = getDownloadCount(file.name)
+        const isHot = downloadCount >= 5
+        
+        const item = document.createElement('div')
+        item.className = 'file-item'
+        item.style.animationDelay = `${index * 0.1}s`
+        
+        item.innerHTML = `
+          <div class="file-info">
+            <div class="file-icon ${fileType.type}">${fileType.icon}</div>
+            <div class="file-details">
+              <h3>${file.name}</h3>
+              <span class="file-type">${fileType.name}</span>
+            </div>
+          </div>
+          <div class="file-size">${formatSize(file.size)}</div>
+          <div class="download-count ${isHot ? 'hot' : ''}">
+            <span class="count-icon">${isHot ? '🔥' : '⬇️'}</span>
+            <span class="count-value">${downloadCount}</span>
+          </div>
+          <a class="download-btn" href="/files/${file.name}" download="${file.name}">
+            <span>下载</span>
+            <span class="arrow">⬇</span>
+          </a>
+        `
+        
+        // 绑定下载事件
+        const btn = item.querySelector('.download-btn')
+        btn.addEventListener('click', (e) => {
+          handleDownload(file.name, btn)
+        })
+        
+        list.appendChild(item)
+      })
+      
+      updateStats()
+    }
+    
+    // 初始化
+    renderFileList()
+  </script>
+</body>
+</html>
