@@ -1075,9 +1075,9 @@
           </div>
         </div>
         <div style="display: flex; gap: 12px;">
-          <button class="download-btn" onclick="handleDownload('${filename}', this, event); closeModal();" style="flex: 1;">
+          <a class="download-btn" href="files/${filename}" download="${filename}" onclick="handleDownload('${filename}', event); closeModal();" style="flex: 1; text-align: center;">
             ⬇️ 立即下载
-          </button>
+          </a>
           <button class="btn" onclick="copyLink('${filename}')" style="padding: 10px 20px;">
             📋 复制链接
           </button>
@@ -1144,103 +1144,52 @@
       renderFileList()
     })
     
-    // 处理下载 - 下载成功后才计数
-    async function handleDownload(filename, element, event) {
-      // 阻止默认下载行为
-      if (event) event.preventDefault()
-      
-      // 找到对应的下载按钮（如果点击的是 file-info）
-      let btnElement = element
-      if (!element.classList.contains('download-btn')) {
-        // 点击的是 file-info 或 file-icon，找到对应的下载按钮
-        const container = element.closest('.file-item') || element.closest('.grid-item')
-        if (container) {
-          btnElement = container.querySelector('.download-btn')
-        }
-      }
-      
-      // 如果是在本地文件系统打开，使用传统下载方式
-      if (isLocalFile()) {
-        // 本地模式下直接下载，不显示错误提示，直接下载
-        const a = document.createElement('a')
-        a.href = `files/${filename}`
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        showToast(`⬇️ 正在下载: ${filename}`)
-        return
-      }
-      
-      // 保存原始文本并显示加载状态
-      const isButton = btnElement && btnElement.classList.contains('download-btn')
-      const originalText = isButton ? btnElement.innerHTML : ''
-      
-      if (isButton) {
-        btnElement.innerHTML = '<span class="loading"></span>'
-        btnElement.style.pointerEvents = 'none'
-      }
-      
-      try {
-        // 使用 fetch 下载文件
-        const response = await fetch(`files/${filename}`)
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error(`文件未找到: ${filename}`)
-          }
-          throw new Error(`服务器错误: ${response.status}`)
-        }
-        
-        // 获取文件 blob
-        const blob = await response.blob()
-        
-        // 检查 blob 大小是否为 0
-        if (blob.size === 0) {
-          throw new Error('文件内容为空')
-        }
-        
-        // 创建下载链接
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
-        
-        // 下载成功后才增加计数
-        const newCount = incrementDownloadCount(filename)
-        
-        // 更新显示
-        const fileItem = element.closest('.file-item') || element.closest('.grid-item')
-        if (fileItem) {
-          const countEl = fileItem.querySelector('.count-value')
-          const countContainer = fileItem.querySelector('.download-count')
+    // 执行下载 - 使用 <a> 标签确保可靠下载
+    function doDownload(filename) {
+      const a = document.createElement('a')
+      a.href = `files/${filename}`
+      a.download = filename
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    }
+    
+    // 更新界面上的下载计数
+    function updateDownloadUI(filename, newCount) {
+      // 更新所有匹配的文件项
+      document.querySelectorAll('.file-item, .grid-item').forEach(item => {
+        const nameEl = item.querySelector('h3')
+        if (nameEl && nameEl.textContent.includes(filename)) {
+          const countEl = item.querySelector('.count-value')
+          const countContainer = item.querySelector('.download-count')
           if (countEl) {
-            countEl.textContent = fileItem.classList.contains('grid-item') ? newCount + ' 次下载' : newCount
+            countEl.textContent = item.classList.contains('grid-item') ? newCount + ' 次下载' : newCount
           }
-          if (countContainer && newCount >= 5) countContainer.classList.add('hot')
+          if (countContainer && newCount >= 5) {
+            countContainer.classList.add('hot')
+          }
         }
-        
-        updateStats()
-        showToast(`✅ 下载成功: ${filename}`)
-        
-      } catch (error) {
-        console.error('下载错误:', error)
-        showToast(`❌ ${error.message}`, 'error')
-      } finally {
-        // 恢复按钮状态
-        if (isButton && btnElement) {
-          btnElement.innerHTML = originalText
-          btnElement.style.pointerEvents = ''
-          
-          // 按钮动画
-          btnElement.style.transform = 'scale(0.95)'
-          setTimeout(() => btnElement.style.transform = '', 150)
-        }
+      })
+      updateStats()
+    }
+    
+    // 处理下载 - 简化版本
+    function handleDownload(filename, event) {
+      // 停止事件冒泡
+      if (event) {
+        event.stopPropagation()
+        event.preventDefault()
       }
+      
+      // 先执行下载（使用 <a> 标签最可靠）
+      doDownload(filename)
+      
+      // 然后计数和更新 UI
+      const newCount = incrementDownloadCount(filename)
+      updateDownloadUI(filename, newCount)
+      
+      showToast(`⬇️ 正在下载: ${filename}`)
     }
     
     // 更新统计
@@ -1315,7 +1264,7 @@
         item.className = 'file-item'
         item.style.animationDelay = `${index * 0.05}s`
         item.innerHTML = `
-          <div class="file-info" onclick="handleDownload('${file.name}', this, event)" style="cursor: pointer;">
+          <a class="file-info" href="files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', event); return true;" style="cursor: pointer; text-decoration: none;">
             <div class="file-icon ${fileType.type}">${fileType.icon}</div>
             <div class="file-details">
               <h3>
@@ -1327,18 +1276,18 @@
                 <span>${new Date(file.date).toLocaleDateString('zh-CN')}</span>
               </div>
             </div>
-          </div>
+          </a>
           <div class="file-size">${formatSize(file.size)}</div>
           <div class="download-count ${isHot ? 'hot' : ''}">
             <span class="count-icon">⬇️</span>
             <span class="count-value">${downloadCount}</span>
           </div>
           <div class="file-actions">
-            <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接">📋</button>
-            <button class="action-btn" onclick="showFileDetails('${file.name}')" title="查看详情">ℹ️</button>
-            <button class="download-btn" onclick="handleDownload('${file.name}', this, event)">
+            <button class="action-btn" onclick="event.stopPropagation(); copyLink('${file.name}')" title="复制链接">📋</button>
+            <button class="action-btn" onclick="event.stopPropagation(); showFileDetails('${file.name}')" title="查看详情">ℹ️</button>
+            <a class="download-btn" href="files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', event)">
               下载
-            </button>
+            </a>
           </div>
         `
         
@@ -1373,8 +1322,8 @@
         item.style.animationDelay = `${index * 0.05}s`
         
         item.innerHTML = `
-          <div class="file-icon ${fileType.type}" onclick="handleDownload('${file.name}', this, event)" style="cursor: pointer;">${fileType.icon}</div>
-          <h3 title="${file.name}" onclick="handleDownload('${file.name}', this, event)" style="cursor: pointer;">${file.name}</h3>
+          <a class="file-icon ${fileType.type}" href="files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', event); return true;" style="cursor: pointer; display: flex; text-decoration: none;">${fileType.icon}</a>
+          <a href="files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', event); return true;" style="text-decoration: none; color: inherit;"><h3 title="${file.name}" style="cursor: pointer;">${file.name}</h3></a>
           <div class="file-meta">
             <span class="file-type-badge">${fileType.name}</span>
             <span>${formatSize(file.size)}</span>
@@ -1384,11 +1333,11 @@
             <span class="count-value">${downloadCount} 次下载</span>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接" style="flex: 0 0 40px;">📋</button>
-            <button class="action-btn" onclick="showFileDetails('${file.name}')" title="查看详情" style="flex: 0 0 40px;">ℹ️</button>
-            <button class="download-btn" onclick="handleDownload('${file.name}', this, event)" style="flex: 1;">
+            <button class="action-btn" onclick="event.stopPropagation(); copyLink('${file.name}')" title="复制链接" style="flex: 0 0 40px;">📋</button>
+            <button class="action-btn" onclick="event.stopPropagation(); showFileDetails('${file.name}')" title="查看详情" style="flex: 0 0 40px;">ℹ️</button>
+            <a class="download-btn" href="files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', event)" style="flex: 1;">
               下载
-            </button>
+            </a>
           </div>
         `
         
