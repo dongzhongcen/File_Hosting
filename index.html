@@ -1066,7 +1066,7 @@
           </div>
         </div>
         <div style="display: flex; gap: 12px;">
-          <button class="download-btn" onclick="handleDownload('${filename}', this); closeModal();" style="flex: 1;">
+          <button class="download-btn" onclick="handleDownload('${filename}', this, event); closeModal();" style="flex: 1;">
             ⬇️ 立即下载
           </button>
           <button class="btn" onclick="copyLink('${filename}')" style="padding: 10px 20px;">
@@ -1135,21 +1135,67 @@
       renderFileList()
     })
     
-    // 处理下载
-    function handleDownload(filename, btnElement) {
-      const newCount = incrementDownloadCount(filename)
+    // 处理下载 - 下载成功后才计数
+    async function handleDownload(filename, btnElement, event) {
+      // 阻止默认下载行为
+      if (event) event.preventDefault()
       
-      if (btnElement.closest('.file-item')) {
-        const countEl = btnElement.closest('.file-item').querySelector('.count-value')
-        const countContainer = btnElement.closest('.file-item').querySelector('.download-count')
-        countEl.textContent = newCount
-        if (newCount >= 5) countContainer.classList.add('hot')
-      }
+      const originalText = btnElement.innerHTML
+      btnElement.innerHTML = '<span class="loading"></span>'
+      btnElement.style.pointerEvents = 'none'
       
-      updateStats()
-      showToast(`已开始下载: ${filename}`)
-      
-      if (btnElement) {
+      try {
+        // 使用 fetch 下载文件
+        const response = await fetch(`/files/${filename}`)
+        
+        if (!response.ok) {
+          throw new Error(`下载失败: ${response.status}`)
+        }
+        
+        // 获取文件 blob
+        const blob = await response.blob()
+        
+        // 创建下载链接
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+        
+        // 下载成功后才增加计数
+        const newCount = incrementDownloadCount(filename)
+        
+        // 更新显示
+        if (btnElement.closest('.file-item')) {
+          const countEl = btnElement.closest('.file-item').querySelector('.count-value')
+          const countContainer = btnElement.closest('.file-item').querySelector('.download-count')
+          if (countEl) countEl.textContent = newCount
+          if (countContainer && newCount >= 5) countContainer.classList.add('hot')
+        }
+        
+        // 如果是网格视图
+        if (btnElement.closest('.grid-item')) {
+          const countEl = btnElement.closest('.grid-item').querySelector('.count-value')
+          const countContainer = btnElement.closest('.grid-item').querySelector('.download-count')
+          if (countEl) countEl.textContent = newCount + ' 次下载'
+          if (countContainer && newCount >= 5) countContainer.classList.add('hot')
+        }
+        
+        updateStats()
+        showToast(`✅ 下载成功: ${filename}`)
+        
+      } catch (error) {
+        console.error('下载错误:', error)
+        showToast(`❌ 下载失败: ${filename}`, 'error')
+      } finally {
+        // 恢复按钮状态
+        btnElement.innerHTML = originalText
+        btnElement.style.pointerEvents = ''
+        
+        // 按钮动画
         btnElement.style.transform = 'scale(0.95)'
         setTimeout(() => btnElement.style.transform = '', 150)
       }
@@ -1245,7 +1291,7 @@
           </div>
           <div class="file-actions">
             <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接">📋</button>
-            <a class="download-btn" href="/files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', this)">
+            <button class="download-btn" onclick="handleDownload('${file.name}', this, event)">
               下载
             </a>
           </div>
@@ -1299,7 +1345,7 @@
           </div>
           <div style="display: flex; gap: 8px;">
             <button class="action-btn" onclick="copyLink('${file.name}')" title="复制链接" style="flex: 0 0 40px;">📋</button>
-            <a class="download-btn" href="/files/${file.name}" download="${file.name}" onclick="handleDownload('${file.name}', this)" style="flex: 1;">
+            <button class="download-btn" onclick="handleDownload('${file.name}', this, event)" style="flex: 1;">
               下载
             </a>
           </div>
