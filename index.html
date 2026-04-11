@@ -1196,6 +1196,7 @@
     // 渲染列表视图
     function renderListView() {
       const list = document.getElementById('fileList')
+      list.innerHTML = ''
       list.className = ''
       
       if (filteredFiles.length === 0) {
@@ -1257,6 +1258,7 @@
     // 渲染网格视图
     function renderGridView() {
       const list = document.getElementById('fileList')
+      list.innerHTML = ''
       list.className = 'file-grid'
       
       if (filteredFiles.length === 0) {
